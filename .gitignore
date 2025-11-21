@@ -1,0 +1,26 @@
+vendor/
+node_modules/
+
+# env files and secrets
+.env
+.env.*.local
+
+# IDE/editor
+.idea/
+.vscode/
+
+# runtime / logs / storage
+storage/
+*.log
+
+# debug and backups we created
+public/debug.php
+public/.htaccess.bak
+
+# OS
+.DS_Store
+Thumbs.db
+
+# DB dumps
+*.sql
+*.sql.gz
