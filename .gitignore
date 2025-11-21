@@ -24,3 +24,6 @@ Thumbs.db
 # DB dumps
 *.sql
 *.sql.gz
+# debug / bin\ndebug2.php
+debug_autoload.php
+composer.phar
