@@ -3,7 +3,8 @@
   "description": "API de reserva de quadras - starter",
   "type": "project",
   "require": {
-    "ext-pdo": "*"
+    "ext-pdo": "*",
+    "zircote/swagger-php": "^5.7"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.6"
