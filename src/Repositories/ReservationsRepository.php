@@ -29,11 +29,9 @@ class ReservationsRepository
 
     public function findByUser(int $userId): array
     {
-        $stmt = $this->pdo->prepare('SELECT r.*, c.name AS court_name, cl.name AS club_name, s.name AS sport_name
+        $stmt = $this->pdo->prepare('SELECT r.*, c.name AS court_name
                                      FROM reservations r
                                      JOIN courts c ON c.id = r.court_id
-                                     JOIN clubs cl ON cl.id = c.club_id
-                                     JOIN sports s ON s.id = c.sport_id
                                      WHERE r.user_id = ? ORDER BY r.start_datetime DESC');
         $stmt->execute([$userId]);
         return $stmt->fetchAll();

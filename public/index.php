@@ -86,12 +86,12 @@ try {
         exit;
     }
 
-    // List "my" reservations (mantém comportamento existente)
+    // List "my" reservations (mine=true returns raw array for simpler mobile parsing)
     if ($method === 'GET' && $uri === '/reservations') {
         $mine = isset($_GET['mine']) && ($_GET['mine'] === 'true' || $_GET['mine'] === '1');
         if ($mine) {
             $ctrl = new ReservationsController($pdo);
-            echo json_encode(['status' => 'success', 'data' => $ctrl->mine()]);
+            echo json_encode($ctrl->mine()); // raw array
             exit;
         }
 
