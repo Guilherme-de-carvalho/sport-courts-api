@@ -12,7 +12,7 @@ class ReservationsRepository
 
     public function hasConflict(int $courtId, string $start, string $end): bool
     {
-        $sql = "SELECT 1 FROM reservations WHERE court_id = ? AND status IN ('CREATED','CONFIRMED')
+        $sql = "SELECT 1 FROM reservations WHERE court_id = ? AND status IN ('pending','confirmed')
                 AND NOT (end_datetime <= ? OR start_datetime >= ?) LIMIT 1";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$courtId, $start, $end]);
@@ -23,7 +23,7 @@ class ReservationsRepository
     {
         // Corrigido: seis placeholders para seis colunas (user_id,court_id,start_datetime,end_datetime,total,status)
         $stmt = $this->pdo->prepare('INSERT INTO reservations (user_id,court_id,start_datetime,end_datetime,total,status) VALUES (?,?,?,?,?,?);');
-        $stmt->execute([$userId, $courtId, $start, $end, $total, 'CREATED']);
+        $stmt->execute([$userId, $courtId, $start, $end, $total, 'pending']);
         return (int)$this->pdo->lastInsertId();
     }
 
@@ -47,7 +47,14 @@ class ReservationsRepository
 
     public function cancel(int $id): bool
     {
-        $stmt = $this->pdo->prepare('UPDATE reservations SET status = ? WHERE id = ?');
-        return $stmt->execute(['CANCELED', $id]);
+        // Only update if current status is different to ensure rowCount reflects a real change
+        $stmt = $this->pdo->prepare('UPDATE reservations SET status = ? WHERE id = ? AND status != ?');
+        $ok = $stmt->execute(['cancelled', $id, 'cancelled']);
+        if (!$ok) {
+            return false;
+        }
+        // execute() can return true even if 0 rows were affected; ensure a row was actually updated
+        $rows = $stmt->rowCount();
+        return ($rows > 0);
     }
 }

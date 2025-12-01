@@ -81,7 +81,18 @@ class ReservationsController
             http_response_code(403);
             return ['error' => 'Forbidden'];
         }
+        // If already canceled, consider it idempotent and return ok=true
+        if (isset($reservation['status']) && strtolower((string)$reservation['status']) === 'cancelled') {
+            return ['ok' => true, 'message' => 'Reservation already canceled'];
+        }
+
         $ok = $this->repo->cancel($id);
-        return ['ok' => (bool)$ok];
+        if ($ok) {
+            return ['ok' => true];
+        }
+
+        // If cancel returned false, no rows were updated (e.g. somehow unchanged)
+        http_response_code(404);
+        return ['ok' => false, 'error' => 'Reservation not updated'];
     }
 }
