@@ -63,6 +63,19 @@ class ReservationsController
         }
     }
 
+    public function index(): array
+    {
+        // Support query ?mine=1 to return only the authenticated user's reservations
+        $mine = $_GET['mine'] ?? null;
+        if ($mine !== null) {
+            $data = $this->mine();
+            return ['status' => 'success', 'data' => $data];
+        }
+        // For now, require the caller to ask for the user's reservations explicitly
+        http_response_code(400);
+        return ['status' => 'error', 'error' => ['code' => 'BAD_REQUEST', 'message' => 'Use ?mine=1 to request your reservations']];
+    }
+
     public function mine(): array
     {
         $user = $this->requireUser();
