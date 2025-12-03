@@ -3,6 +3,15 @@ declare(strict_types=1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
+// Habilita debug local (somente em `localhost`) para facilitar diagnóstico
+// de erros durante desenvolvimento. Remove/ajuste em produção.
+$host = $_SERVER['HTTP_HOST'] ?? '';
+if (in_array($host, ['localhost', '127.0.0.1'])) {
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    error_reporting(E_ALL);
+}
+
 use App\Database;
 use App\Controllers\SportsController;
 use App\Controllers\AvailabilityController;
@@ -142,6 +151,13 @@ try {
     echo json_encode(['status'=>'error','error'=>['code'=>'NOT_FOUND','message'=>'Endpoint não encontrado']], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
 } catch (\Throwable $e) {
     http_response_code(500);
-    echo json_encode(['status'=>'error','error'=>['code'=>'SERVER_ERROR','message'=>$e->getMessage()]], JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+    $err = ['status'=>'error','error'=>['code'=>'SERVER_ERROR','message'=>$e->getMessage()]];
+    // Se estivermos em ambiente local, inclua trace para debug
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if (in_array($host, ['localhost', '127.0.0.1'])) {
+        $err['error']['trace'] = $e->getTraceAsString();
+        $err['error']['file'] = $e->getFile() . ':' . $e->getLine();
+    }
+    echo json_encode($err, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     exit;
 }
